@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>れんしゅうきろく</title>
+
+<style>
+  body { background:#fff6e0; font-family:"Kosugi Maru",sans-serif; text-align:center; }
+  .day {
+    background:white;
+    width:70px;
+    height:70px;
+    border-radius:15px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:16px;
+    margin:5px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+  }
+  .grid {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:20px;
+  }
+  .small { font-size:12px; color:#4c8f3a; }
+</style>
+
+</head>
+<a id="backBtn" href="index.html">← ホームへ</a>
+<body>
+
+<h2 style="color:#4c8f3a;">📅 れんしゅうきろく</h2>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const history = JSON.parse(localStorage.getItem("history") || "{}");
+
+const grid = document.getElementById("grid");
+
+Object.keys(history).forEach(day => {
+  let div = document.createElement("div");
+  div.className = "day";
+  div.innerHTML = `
+    ${day.slice(5)}<br>
+    <span class="small">${history[day].length}回</span>
+  `;
+  grid.appendChild(div);
+});
+</script>
+
+</body>
+</html>

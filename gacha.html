@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ガチャ</title>
+<style>
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fbf4dd;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  #egg {
+    width: 200px;
+    transition: transform 0.3s ease;
+  }
+
+  /* 割れる時の揺れアニメーション */
+  .shake {
+    animation: shake 0.4s infinite;
+  }
+  @keyframes shake {
+    0% { transform: translate(0px, 0px) rotate(0deg); }
+    25% { transform: translate(3px, -2px) rotate(1deg); }
+    50% { transform: translate(-3px, 2px) rotate(-1deg); }
+    75% { transform: translate(2px, -3px) rotate(1deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+  }
+
+  #resultImg {
+  width: 260px;
+  display: none;    /* 最初は非表示のままでOK */
+  margin: 20px auto;
+}
+
+
+  #resultText {
+    font-size: 24px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #4b7b3a;
+    display: none;
+  }
+
+  #gachaBtn {
+    margin-top: 20px;
+    padding: 14px 28px;
+    font-size: 22px;
+    background: #7cc76c;
+    border-radius: 12px;
+    color: white;
+    border: none;
+  }
+
+  #backBtn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #4c8f3a;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+  }
+</style>
+</head>
+
+<body>
+
+<a id="backBtn" href="index.html">← もどる</a>
+
+<h1>🥚ガチャ</h1>
+
+<img id="egg" src="images/0egg.png">
+
+<button id="gachaBtn" onclick="startGacha()">ガチャを回す</button>
+
+<img id="resultImg">
+<div id="resultText"></div>
+
+
+<script>
+/* ★ ここにあなたの恐竜画像（PNG）の一覧を入れる ★ */
+const cards = [
+  { name: "ティラノサウルス", rare: 5, img: "images/tira.png" },
+  { name: "トリケラトプス", rare: 4, img: "images/tori.png" },
+  { name: "ステゴサウルス", rare: 3, img: "images/ste.png" },
+  { name: "ブラキオサウルス", rare: 3, img: "images/bra.png" },
+  { name: "プテラノドン", rare: 2, img: "images/pte.png" },
+  { name: "スピノサウルス", rare: 5, img: "images/spi.png" },
+  { name: "アンキロサウルス", rare: 2, img: "images/an.png" },
+  { name: "パラサウロロフス", rare: 4, img: "images/para.png" },
+  { name: "イグアノドン", rare: 2, img: "images/igu.png" },
+  { name: "ヴェロキラプトル", rare: 4, img: "images/vero.png" }
+];
+
+/* ガチャ開始 */
+function startGacha() {
+  const egg = document.getElementById("egg");
+  egg.classList.add("shake");
+
+  /* 卵が割れる演出 */
+  setTimeout(() => {
+    egg.src = "images/egg.png";
+  }, 600);
+
+  /* 恐竜が出現 */
+  setTimeout(() => {
+    egg.style.display = "none";
+
+    const result = cards[Math.floor(Math.random() * cards.length)];
+    const resultImg = document.getElementById("resultImg");
+    const resultText = document.getElementById("resultText");
+
+    resultImg.src = result.img;
+    resultImg.style.display = "block";
+    resultText.style.display = "block";
+    resultText.textContent = `${result.name}（★${result.rare}）が出た！`;
+
+  }, 1200);
+}
+</script>
+
+</body>
+</html>

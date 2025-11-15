@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>50音ひょう</title>
+
+<style>
+  body {
+    background: #fff6e0;
+    font-family: "Kosugi Maru", sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .char {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px 0;
+    font-size: 30px;
+    color: #4c8f3a;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  }
+  .char:active {
+    background: #d7f4d7;
+  }
+</style>
+
+</head>
+<a id="backBtn" href="index.html">← ホームへ</a>
+<body>
+
+<h2 style="color:#4c8f3a; font-size:28px;">ひらがなをえらんでね</h2>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const chars = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+
+const grid = document.getElementById("grid");
+
+chars.split("").forEach(c => {
+  let div = document.createElement("div");
+  div.className = "char";
+  div.textContent = c;
+  div.onclick = () => {
+    localStorage.setItem("selectedChar", c);
+    location.href = "practice.html";
+  };
+  grid.appendChild(div);
+});
+</script>
+
+</body>
+</html>
