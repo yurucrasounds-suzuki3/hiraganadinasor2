@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>ガチャ</title>
+
 <style>
   body {
     font-family: 'Noto Sans JP', sans-serif;
@@ -35,11 +36,10 @@
   }
 
   #resultImg {
-  width: 260px;
-  display: none;    /* 最初は非表示のままでOK */
-  margin: 20px auto;
-}
-
+    width: 260px;
+    display: none;
+    margin: 20px auto;
+  }
 
   #resultText {
     font-size: 24px;
@@ -78,16 +78,20 @@
 
 <h1>🥚ガチャ</h1>
 
-<img id="egg" src="images/0egg.png">
+<!-- ▼ 練習不足のとき、ここを書き換える用 -->
+<div id="gachaArea">
 
-<button id="gachaBtn" onclick="startGacha()">ガチャを回す</button>
+  <img id="egg" src="images/0egg.png">
 
-<img id="resultImg">
-<div id="resultText"></div>
+  <button id="gachaBtn" onclick="startGacha()">ガチャを回す</button>
 
+  <img id="resultImg">
+  <div id="resultText"></div>
+
+</div>
 
 <script>
-/* ★ ここにあなたの恐竜画像（PNG）の一覧を入れる ★ */
+/* ▼ 恐竜カード一覧 */
 const cards = [
   { name: "ティラノサウルス", rare: 5, img: "images/tira.png" },
   { name: "トリケラトプス", rare: 4, img: "images/tori.png" },
@@ -101,17 +105,38 @@ const cards = [
   { name: "ヴェロキラプトル", rare: 4, img: "images/vero.png" }
 ];
 
-/* ガチャ開始 */
+/* ▼ ページ読み込み時にガチャ制限チェック */
+let count = Number(localStorage.getItem("practiceCount") || 0);
+
+if (count < 10) {
+  document.getElementById("gachaArea").innerHTML = `
+    <h2>ガチャはまだ回せません🥲</h2>
+    <p style="font-size:22px; color:#555;">あと <b>${10 - count}</b> 回 なぞり練習が必要です</p>
+    <a href="hiragana.html"
+       style="display:inline-block;margin-top:30px;background:#4c8f3a;color:white;padding:15px 25px;border-radius:10px;text-decoration:none;">
+       れんしゅうページへ
+    </a>
+  `;
+}
+
+/* ▼ ガチャ開始 */
 function startGacha() {
+
+  // 10回消費
+  let count = Number(localStorage.getItem("practiceCount") || 0);
+  if (count < 10) {
+    alert("練習が足りません！");
+    return;
+  }
+  localStorage.setItem("practiceCount", count - 10);
+
   const egg = document.getElementById("egg");
   egg.classList.add("shake");
 
-  /* 卵が割れる演出 */
   setTimeout(() => {
     egg.src = "images/egg.png";
   }, 600);
 
-  /* 恐竜が出現 */
   setTimeout(() => {
     egg.style.display = "none";
 

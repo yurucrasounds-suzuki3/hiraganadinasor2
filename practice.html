@@ -146,8 +146,12 @@ function finishPractice() {
   count++;
   localStorage.setItem("practiceCount", count);
 
-  alert(`できた！すごい！🦖\n\nガチャまで：あと ${10 - count} 回`);
+  let rest = 10 - count;
+  if (rest <= 0) rest = 0;
+
+  alert(`できた！すごい！🦖\n\nガチャまで：あと ${rest} 回`);
 }
+
 </script>
 
 </body>
