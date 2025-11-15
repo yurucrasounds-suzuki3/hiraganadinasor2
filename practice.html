@@ -141,16 +141,17 @@ function finishPractice() {
   history[today].push(selected);
   localStorage.setItem("history", JSON.stringify(history));
 
-  // 練習回数 +1
+  // 🔥 練習回数 +1
   let count = Number(localStorage.getItem("practiceCount") || 0);
   count++;
   localStorage.setItem("practiceCount", count);
 
-  let rest = 10 - count;
-  if (rest <= 0) rest = 0;
+  alert(`できた！すごい！🦖\n\nガチャまで：あと ${10 - count} 回`);
 
-  alert(`できた！すごい！🦖\n\nガチャまで：あと ${rest} 回`);
+  // 🔥 ここ！ 書いた線を自動で消す
+  clearCanvas();
 }
+
 
 </script>
 
