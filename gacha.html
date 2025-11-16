@@ -23,16 +23,16 @@
     transition: transform 0.3s ease;
   }
 
-  /* 割れる時の揺れアニメーション */
   .shake {
     animation: shake 0.4s infinite;
   }
+
   @keyframes shake {
-    0% { transform: translate(0px, 0px) rotate(0deg); }
-    25% { transform: translate(3px, -2px) rotate(1deg); }
-    50% { transform: translate(-3px, 2px) rotate(-1deg); }
-    75% { transform: translate(2px, -3px) rotate(1deg); }
-    100% { transform: translate(0px, 0px) rotate(0deg); }
+    0% { transform: translate(0,0) rotate(0); }
+    25% { transform: translate(3px,-2px) rotate(1deg); }
+    50% { transform: translate(-3px,2px) rotate(-1deg); }
+    75% { transform: translate(2px,-3px) rotate(1deg); }
+    100% { transform: translate(0,0) rotate(0); }
   }
 
   #resultImg {
@@ -78,34 +78,108 @@
 
 <h1>🥚ガチャ</h1>
 
-<!-- ▼ 練習不足のとき、ここを書き換える用 -->
 <div id="gachaArea">
-
   <img id="egg" src="images/0egg.png">
-
   <button id="gachaBtn" onclick="startGacha()">ガチャを回す</button>
-
   <img id="resultImg">
   <div id="resultText"></div>
-
 </div>
 
 <script>
-/* ▼ 恐竜カード一覧 */
+/* ---------- カード一覧（33種類） ---------- */
 const cards = [
-  { name: "ティラノサウルス", rare: 5, img: "images/tira.png" },
-  { name: "トリケラトプス", rare: 4, img: "images/tori.png" },
-  { name: "ステゴサウルス", rare: 3, img: "images/ste.png" },
-  { name: "ブラキオサウルス", rare: 3, img: "images/bra.png" },
-  { name: "プテラノドン", rare: 2, img: "images/pte.png" },
-  { name: "スピノサウルス", rare: 5, img: "images/spi.png" },
-  { name: "アンキロサウルス", rare: 2, img: "images/an.png" },
-  { name: "パラサウロロフス", rare: 4, img: "images/para.png" },
-  { name: "イグアノドン", rare: 2, img: "images/igu.png" },
-  { name: "ヴェロキラプトル", rare: 4, img: "images/vero.png" }
+  /* 恐竜 */
+  { id: "tira", name: "ティラノサウルス", rare: 5, img: "images/tira.png" },
+  { id: "tori", name: "トリケラトプス", rare: 4, img: "images/tori.png" },
+  { id: "ste", name: "ステゴサウルス", rare: 3, img: "images/ste.png" },
+  { id: "bra", name: "ブラキオサウルス", rare: 3, img: "images/bra.png" },
+  { id: "pte", name: "プテラノドン", rare: 2, img: "images/pte.png" },
+  { id: "spi", name: "スピノサウルス", rare: 5, img: "images/spi.png" },
+  { id: "an",  name: "アンキロサウルス", rare: 2, img: "images/an.png" },
+  { id: "para", name: "パラサウロロフス", rare: 4, img: "images/para.png" },
+  { id: "igu",  name: "イグアノドン", rare: 2, img: "images/igu.png" },
+  { id: "vero", name: "ヴェロキラプトル", rare: 4, img: "images/vero.png" },
+
+  /* 海の生き物 */
+  { id: "tako", name: "タコ", rare: 2, img: "images/tako.png" },
+  { id: "same", name: "サメ", rare: 4, img: "images/same.png" },
+  { id: "iruka", name: "イルカ", rare: 3, img: "images/iruka.png" },
+  { id: "kumanomi", name: "カクレクマノミ", rare: 2, img: "images/kumanomi.png" },
+  { id: "kurage", name: "クラゲ", rare: 1, img: "images/kurage.png" },
+  { id: "manta", name: "マンタ", rare: 3, img: "images/manta.png" },
+  { id: "hitode", name: "ヒトデ", rare: 1, img: "images/hitode.png" },
+  { id: "secret", name: "シークレット", rare: 5, img: "images/secret.png" },
+  { id: "ika", name: "イカ", rare: 2, img: "images/ika.png" },
+  { id: "rakko", name: "ラッコ", rare: 3, img: "images/rakko.png" },
+  { id: "kame", name: "カメ", rare: 3, img: "images/kame.png" },
+
+  /* 昆虫 */
+  { id: "tyo", name: "蝶々", rare: 1, img: "images/tyo.png" },
+  { id: "kabu", name: "カブトムシ", rare: 4, img: "images/kabu.png" },
+  { id: "ton", name: "トンボ", rare: 2, img: "images/ton.png" },
+  { id: "tento", name: "てんとう虫", rare: 1, img: "images/tento.png" },
+  { id: "kama", name: "カマキリ", rare: 3, img: "images/kama.png" },
+  { id: "kuwa", name: "クワガタ", rare: 4, img: "images/kuwa.png" },
+  { id: "hachi", name: "ハチ", rare: 2, img: "images/hachi.png" },
+  { id: "kata", name: "カタツムリ", rare: 1, img: "images/kata.png" },
+  { id: "imo", name: "芋虫", rare: 1, img: "images/imo.png" },
+  { id: "semi", name: "セミ", rare: 2, img: "images/semi.png" },
+  { id: "bata", name: "バッタ", rare: 2, img: "images/bata.png" }
 ];
 
-/* ▼ ページ読み込み時にガチャ制限チェック */
+/* ---------- 図鑑に登録 ---------- */
+function addToZukan(card) {
+  let zukan = JSON.parse(localStorage.getItem("zukan") || "{}");
+
+  if (zukan[card.id]) {
+    zukan[card.id].count++;
+  } else {
+    zukan[card.id] = {
+      name: card.name,
+      img: card.img,
+      rare: card.rare,
+      count: 1
+    };
+  }
+
+  localStorage.setItem("zukan", JSON.stringify(zukan));
+}
+
+/* ---------- レア度 → 重み ---------- */
+function getWeight(rare) {
+  switch (rare) {
+    case 1: return 5;
+    case 2: return 3;
+    case 3: return 2;
+    case 4: return 1;
+    case 5: return 0.5;
+  }
+}
+
+/* ---------- ガチャ抽選 ---------- */
+function rollGacha() {
+
+  /* --- secret 1% --- */
+  if (Math.random() < 0.01) {
+    return cards.find(c => c.id === "secret");
+  }
+
+  /* --- 残り99％ → 重み付き抽選 --- */
+  let pool = [];
+
+  cards.forEach(card => {
+    if (card.id === "secret") return; // secretは除外
+
+    const weight = getWeight(card.rare);
+    for (let i = 0; i < weight * 10; i++) {
+      pool.push(card);
+    }
+  });
+
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/* ---------- 練習回数チェック ---------- */
 let count = Number(localStorage.getItem("practiceCount") || 0);
 
 if (count < 10) {
@@ -119,20 +193,21 @@ if (count < 10) {
   `;
 }
 
-/* ▼ ガチャ開始 */
+/* ---------- ガチャ開始 ---------- */
 function startGacha() {
 
-  // 10回消費
   let count = Number(localStorage.getItem("practiceCount") || 0);
   if (count < 10) {
     alert("練習が足りません！");
     return;
   }
+
   localStorage.setItem("practiceCount", count - 10);
 
   const egg = document.getElementById("egg");
   egg.classList.add("shake");
 
+  /* 卵演出 */
   setTimeout(() => {
     egg.src = "images/egg.png";
   }, 600);
@@ -140,14 +215,20 @@ function startGacha() {
   setTimeout(() => {
     egg.style.display = "none";
 
-    const result = cards[Math.floor(Math.random() * cards.length)];
+    /* --- 高機能抽選 --- */
+    const result = rollGacha();
+
+    /* 結果反映 */
     const resultImg = document.getElementById("resultImg");
     const resultText = document.getElementById("resultText");
 
     resultImg.src = result.img;
     resultImg.style.display = "block";
-    resultText.style.display = "block";
+
     resultText.textContent = `${result.name}（★${result.rare}）が出た！`;
+    resultText.style.display = "block";
+
+    addToZukan(result);
 
   }, 1200);
 }
