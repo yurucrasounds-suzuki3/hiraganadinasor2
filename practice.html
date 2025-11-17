@@ -128,8 +128,9 @@ document.getElementById("templateImg").src = `images/stroke/${selected}.png`;
 
 function updateProgress() {
   let count = Number(localStorage.getItem("practiceCount") || 0);
+  const rest = Math.max(0, 10 - count);
   document.getElementById("progress").textContent =
-    `ガチャまで：あと ${10 - count} 回`;
+    rest > 0 ? `ガチャまで：あと ${rest} かい` : `ガチャがひけるよ！`;
 }
 updateProgress();
 
@@ -166,7 +167,7 @@ canvas.addEventListener("pointermove", e => {
   // 線の距離を加算
   const dx = x - lastX;
   const dy = y - lastY;
-  drawDistance += Math.sqrt(dx*dx + dy*dy);   // ← 距離として追加
+  drawDistance += Math.sqrt(dx*dx + dy*dy);
 
   ctx.lineWidth = 12;
   ctx.lineCap = "round";
@@ -200,6 +201,34 @@ function showPopup(text) {
 }
 
 /* ---------------------------
+   今日のれんしゅうを history に記録
+   （れんしゅうきろく画面が読むデータ）
+---------------------------- */
+function savePracticeHistory() {
+  // 既存の history を取得
+  const history = JSON.parse(localStorage.getItem("history") || "{}");
+
+  // 今日のキー（YYYY-MM-DD）
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const key = `${y}-${m}-${d}`;
+
+  // その日が初めてなら配列を作る
+  if (!history[key]) history[key] = [];
+
+  // 1かい分を追加（中身はなんでもOK。ここでは文字情報も保存）
+  history[key].push({
+    char: selected,
+    time: Date.now()
+  });
+
+  // 保存
+  localStorage.setItem("history", JSON.stringify(history));
+}
+
+/* ---------------------------
    できた！処理
 ---------------------------- */
 function finishPractice() {
@@ -207,29 +236,33 @@ function finishPractice() {
 
   console.log("distance =", drawDistance);
 
-  /* ▼ 書いたかどうか判定（距離が一定以下ならNG） */
-  if (drawDistance < 150) {   // ← 超甘い判定（子ども向け）
+  // あまり書いていなかったら弾く
+  if (drawDistance < 150) {
     showPopup("まずは書いてみよう！✏️");
     return;
   }
 
-  /* ▼ 練習カウント */
+  // ▼ 練習回数カウント（ガチャ用）
   let count = Number(localStorage.getItem("practiceCount") || 0);
   count++;
+  if (count > 10) count = 10;   // 上限10かい
   localStorage.setItem("practiceCount", count);
 
+  // ▼ 今日のれんしゅう履歴を保存（カレンダー用）
+  savePracticeHistory();
+
+  // プログレス表示更新
   updateProgress();
 
-  /* ▼ 未達成なら次へ */
+  // まだ10かい未満
   if (count < 10) {
-    showPopup(`すごい！🦖 ガチャまで あと ${10 - count} 回！`);
+    showPopup(`すごい！🦖 ガチャまで あと ${10 - count} かい！`);
     clearCanvas();
     return;
   }
 
-  /* ▼ 10回達成 */
-  localStorage.setItem("practiceCount", 10);
-  showPopup("10回達成！ガチャだ！！🎉🦖");
+  // 10かい達成
+  showPopup("10かい たっせい！ガチャだ！！🎉🦖");
 
   setTimeout(() => {
     location.href = "gacha.html";
