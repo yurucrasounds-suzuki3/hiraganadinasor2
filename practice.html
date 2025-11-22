@@ -117,8 +117,13 @@
 
 <script>
 /* =====================================================
-    初期設定
+    初期設定（通常練習ならおまかせOFF）
 ===================================================== */
+
+// 通常練習から来た場合（hiragana.html）
+if (!localStorage.getItem("omakaseMode")) {
+  localStorage.removeItem("omakaseCount");
+}
 
 // 現在の文字
 let selected = localStorage.getItem("selectedChar") || "あ";
@@ -129,11 +134,13 @@ document.getElementById("templateImg").src = `images/stroke/${selected}.png`;
 let omakaseMode = localStorage.getItem("omakaseMode") === "true";
 let omakaseCount = Number(localStorage.getItem("omakaseCount") || 0);
 
-// 通常モードのガチャ進行度
+/* =====================================================
+    表示する進行状況
+===================================================== */
 function updateProgress() {
   if (omakaseMode) {
     document.getElementById("progress").textContent =
-      `おまかせモード ${omakaseCount} / 10`;
+      `おまかせモード：${omakaseCount} / 10`;
     return;
   }
 
@@ -226,17 +233,15 @@ function savePracticeHistory() {
 }
 
 /* =====================================================
-   おまかせモードの次ステップ処理
+   おまかせモード：次の処理
 ===================================================== */
-function goNextOmakase() {
+function handleOmakaseNext() {
 
   omakaseCount++;
   localStorage.setItem("omakaseCount", omakaseCount);
 
   // ★ 10回達成 → バトルへ！
   if (omakaseCount >= 10) {
-
-    // 終了処理
     localStorage.removeItem("omakaseMode");
     localStorage.removeItem("omakaseCount");
 
@@ -250,17 +255,17 @@ function goNextOmakase() {
   }
 
   // 次のランダム文字
-  const allChars =
+  const chars =
     "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん" +
     "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン" +
     "0123456789" +
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
     "abcdefghijklmnopqrstuvwxyz";
 
-  const next = allChars[Math.floor(Math.random() * allChars.length)];
-  localStorage.setItem("selectedChar", next);
+  const nextChar = chars[Math.floor(Math.random() * chars.length)];
+  localStorage.setItem("selectedChar", nextChar);
 
-  showPopup(`${selected} できた！つぎは「${next}」！`);
+  showPopup(`${selected} できた！つぎは「${nextChar}」！`);
 
   setTimeout(() => {
     location.href = "practice.html";
@@ -283,11 +288,11 @@ function finishPractice() {
 
   /* ▼ おまかせモード */
   if (omakaseMode) {
-    goNextOmakase();
+    handleOmakaseNext();
     return;
   }
 
-  /* ▼ 通常モード：5 回でガチャ */
+  /* ▼ 通常モード：5回でガチャ */
   let count = Number(localStorage.getItem("practiceCount") || 0);
   count = Math.min(count + 1, 5);
 
