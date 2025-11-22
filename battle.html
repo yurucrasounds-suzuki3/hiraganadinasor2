@@ -6,118 +6,224 @@
 <title>バトル</title>
 
 <style>
+  * { touch-action: manipulation; }
+
   body {
     background: linear-gradient(#ffe9b3 0%, #fff6e0 40%, #f2d39a 100%);
     font-family: "Kosugi Maru", sans-serif;
     margin: 0;
     padding-top: 20px;
     text-align: center;
-    touch-action: none; /* ← ← スマホの画面スクロールを無効化 */
+    overflow: hidden;
   }
-
   #backBtn {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background: #4c8f3a;
-    color: white;
-    padding: 10px 18px;
-    border-radius: 20px;
-    text-decoration: none;
-    z-index: 10;
-  }
-
-  h2 {
-    color:#4c8f3a;
-    margin-bottom: 10px;
+    position: fixed; top: 10px; left: 10px;
+    background: #4c8f3a; color: white;
+    padding: 10px 18px; border-radius: 20px;
+    text-decoration: none; z-index: 10;
   }
 
   .battle-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 650px;
-    margin: 0 auto;
+    width: 100%; max-width: 650px; margin: 0 auto;
   }
-
   .battle-area {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px auto;
-    width: 90%;
+    display: flex; justify-content: space-between;
+    align-items: center; width: 90%; margin: 10px auto;
   }
 
-  .char {
-    width: 40%;
-  }
-
-  .char img {
-    width: 100%;
-    max-width: 180px;
-  }
+  .char { width: 40%; }
+  .char img { width: 100%; max-width: 200px; }
 
   .ground {
-    width: 80%;
-    height: 20px;
-    background: rgba(0,0,0,0.08);
-    border-radius: 50%;
-    margin: 0 auto 5px;
+    width: 80%; height: 20px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%; margin: 0 auto 5px;
   }
 
   .hp-bar {
-    width: 80%;
-    height: 14px;
-    background: #ccc;
-    border-radius: 10px;
+    width: 80%; height: 14px;
+    background: #ccc; border-radius: 10px;
     margin: 4px auto 5px;
     overflow: hidden;
   }
   .hp-inner {
-    height: 100%;
-    background: #4c8f3a;
+    height: 100%; background: #4c8f3a;
     transition: width 0.3s;
   }
 
-  .char-name {
-    font-size: 18px;
-    margin-top: 2px;
-  }
-
-  #hitEffect {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 52px;
-    transform: translate(-50%, -50%) scale(0.3);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #hitEffect.show {
-    animation: boom 0.35s ease-out;
-  }
-
-  @keyframes boom {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.2) rotate(-10deg);
-    }
-    40% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1.1) rotate(8deg);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
-    }
-  }
+  .char-name { font-size: 18px; margin-top: 2px; }
 
   #attackBtn {
-    margin-top: 20px;
-    padding: 20px 40px;
-    background: #ff7f50;
-    color: #fff;
-    font-size: 28px;
-    border: none;
+    margin-top: 20px; padding: 20px 40px;
+    background: #ff7f50; color: #fff;
+    font-size: 28px; border: none;
     border-radius: 15px;
-    box
+  }
+  #attackBtn:active { transform: scale(0.95); }
+
+  #log {
+    background: #fff; width: 90%; max-width: 360px;
+    margin: 20px auto; padding: 15px;
+    height: 150px; overflow-y: auto;
+    border-radius: 15px;
+  }
+
+  #popup {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    background: white; padding: 25px 35px;
+    border-radius: 20px; font-size: 24px;
+    opacity: 0; pointer-events: none;
+    transition: 0.3s; z-index: 99;
+  }
+  #popup.show {
+    opacity: 1; transform: translate(-50%,-50%) scale(1);
+  }
+</style>
+</head>
+
+<body>
+
+<a id="backBtn" href="index.html">← ホームへ</a>
+
+<h2>バトル！</h2>
+
+<div class="battle-wrapper">
+  <div class="battle-area">
+
+    <div class="char">
+      <div class="ground"></div>
+      <img id="playerImg">
+      <div class="hp-bar"><div id="playerHp" class="hp-inner"></div></div>
+      <div id="playerName" class="char-name"></div>
+    </div>
+
+    <div class="char">
+      <div class="ground"></div>
+      <img id="enemyImg">
+      <div class="hp-bar"><div id="enemyHp" class="hp-inner"></div></div>
+      <div id="enemyName" class="char-name"></div>
+    </div>
+
+  </div>
+</div>
+
+<button id="attackBtn" disabled>よーい…</button>
+<div id="log"></div>
+<div id="popup"></div>
+
+<script>
+const WIN_TAPS = 10;
+
+/* 自分のキャラ（とりあえずティラノ） */
+const playerChar = {
+  name: "ティラノサウルス",
+  img: "images/tira.png"
+};
+
+/* 敵キャラ（おに） */
+const enemyChar = {
+  name: "あかおに",
+  img: "images/oni.png"
+};
+
+/* 表示処理 */
+document.getElementById("playerImg").src = playerChar.img;
+document.getElementById("playerName").textContent = playerChar.name;
+document.getElementById("enemyImg").src = enemyChar.img;
+document.getElementById("enemyName").textContent = enemyChar.name;
+
+let playerHP = 100;
+let enemyHP  = 100;
+
+function updateHp() {
+  document.getElementById("playerHp").style.width = playerHP + "%";
+  document.getElementById("enemyHp").style.width  = enemyHP + "%";
+}
+updateHp();
+
+/* ログ */
+function log(t){
+  const box = document.getElementById("log");
+  box.innerHTML += t + "<br>";
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ポップアップ */
+function showPopup(t){
+  const p = document.getElementById("popup");
+  p.textContent = t;
+  p.classList.add("show");
+  setTimeout(()=>p.classList.remove("show"),1500);
+}
+
+/* バトル処理 */
+let tapCount = 0;
+let timeLeft = 5;
+
+const attackBtn = document.getElementById("attackBtn");
+
+/* 攻撃（タップ） */
+attackBtn.addEventListener("click", ()=>{
+  tapCount++;
+  log("こうげき！");
+});
+
+/* カウントダウン */
+let startCount = 3;
+const startInterval = setInterval(()=>{
+  attackBtn.textContent = "よーい…" + startCount;
+  startCount--;
+
+  if(startCount < 0){
+    clearInterval(startInterval);
+    startBattle();
+  }
+}, 1000);
+
+/* バトル開始 */
+function startBattle(){
+  attackBtn.disabled = false;
+  attackBtn.textContent = "こうげき！（5）";
+
+  const timer = setInterval(()=>{
+    timeLeft--;
+    attackBtn.textContent = `こうげき！（${timeLeft}）`;
+
+    if(timeLeft <= 0){
+      clearInterval(timer);
+      attackBtn.disabled = true;
+      finishBattle();
+    }
+  }, 1000);
+}
+
+/* 結果処理 */
+function finishBattle(){
+  enemyHP = Math.max(0, 100 - tapCount * 5);
+  updateHp();
+
+  log(`あなたのタップすう：${tapCount} かい`);
+
+  if(tapCount >= WIN_TAPS){
+    log("あなたのかち！！🎉");
+    showPopup("🎉 かったよ！！");
+
+    /* ★ 勝利 → チケット +1 ★ */
+    let t = Number(localStorage.getItem("specialTicket") || 0);
+    localStorage.setItem("specialTicket", t + 1);
+
+    /* ガチャへ */
+    setTimeout(()=>{
+      location.href = "special_gacha.html";
+    }, 1200);
+
+  } else {
+    log("ひきわけ！");
+    showPopup("ひきわけ！");
+  }
+}
+</script>
+
+</body>
+</html>
