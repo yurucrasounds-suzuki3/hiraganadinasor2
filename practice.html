@@ -128,9 +128,36 @@ if (!localStorage.getItem("omakaseMode")) {
 // 現在の文字
 let selected = localStorage.getItem("selectedChar") || "あ";
 document.getElementById("title").textContent = `${selected} をなぞろう！`;
-document.getElementById("templateImg").src = `images/stroke/${selected}.png`;
 
-// おまかせモード情報
+/* =====================================================
+    ★ ファイル名の自動判定（ここが今回のメイン）
+===================================================== */
+function getStrokeImagePath(ch) {
+  // ひらがな
+  if (/[あ-ん]/.test(ch)) return `images/stroke/hira/${ch}.png`;
+
+  // カタカナ
+  if (/[ア-ン]/.test(ch)) return `images/stroke/kata/${ch}.png`;
+
+  // 数字
+  if (/[0-9]/.test(ch)) return `images/stroke/num/${ch}.png`;
+
+  // ローマ字（A〜Z）
+  if (/[A-Z]/.test(ch)) return `images/stroke/roman_upper/${ch}.png`;
+
+  // ローマ字（a〜z）
+  if (/[a-z]/.test(ch)) return `images/stroke/roman_lower/${ch}.png`;
+
+  // デフォルト
+  return `images/stroke/${ch}.png`;
+}
+
+// この行を置き換え
+document.getElementById("templateImg").src = getStrokeImagePath(selected);
+
+/* =====================================================
+    おまかせモード情報
+===================================================== */
 let omakaseMode = localStorage.getItem("omakaseMode") === "true";
 let omakaseCount = Number(localStorage.getItem("omakaseCount") || 0);
 
@@ -233,14 +260,13 @@ function savePracticeHistory() {
 }
 
 /* =====================================================
-   おまかせモード：次の処理
+   おまかせモード：次へ
 ===================================================== */
 function handleOmakaseNext() {
 
   omakaseCount++;
   localStorage.setItem("omakaseCount", omakaseCount);
 
-  // ★ 10回達成 → バトルへ！
   if (omakaseCount >= 10) {
     localStorage.removeItem("omakaseMode");
     localStorage.removeItem("omakaseCount");
@@ -254,7 +280,6 @@ function handleOmakaseNext() {
     return;
   }
 
-  // 次のランダム文字
   const chars =
     "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん" +
     "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン" +
@@ -286,13 +311,11 @@ function finishPractice() {
 
   savePracticeHistory();
 
-  /* ▼ おまかせモード */
   if (omakaseMode) {
     handleOmakaseNext();
     return;
   }
 
-  /* ▼ 通常モード：5回でガチャ */
   let count = Number(localStorage.getItem("practiceCount") || 0);
   count = Math.min(count + 1, 5);
 
