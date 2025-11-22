@@ -98,7 +98,7 @@
 <div id="zukanArea"></div>
 
 <script>
-/* ---------- 33種類（恐竜＋海＋昆虫） ---------- */
+/* ---------- 33種類（恐竜＋海＋昆虫）＋スペシャル4種 ---------- */
 const cards = [
   /* 恐竜 */
   { id: "tira", name: "ティラノサウルス", rare: 5, img: "images/tira.png", cat: "恐竜" },
@@ -136,8 +136,15 @@ const cards = [
   { id: "kata", name: "カタツムリ", rare: 1, img: "images/kata.png", cat: "虫" },
   { id: "imo", name: "芋虫", rare: 1, img: "images/imo.png", cat: "虫" },
   { id: "semi", name: "セミ", rare: 2, img: "images/semi.png", cat: "虫" },
-  { id: "bata", name: "バッタ", rare: 2, img: "images/bata.png", cat: "虫" }
+  { id: "bata", name: "バッタ", rare: 2, img: "images/bata.png", cat: "虫" },
+
+  /* ★スペシャルレジェンド★ */
+  { id: "gold_tira",    name: "金ティラノ",       rare: "🌟レジェンド", img: "images/legend_gold_tira.png",   cat: "スペシャル" },
+  { id: "rainbow_pte",  name: "虹プテラ",         rare: "🌈レジェンド", img: "images/legend_rainbow_pte.png", cat: "スペシャル" },
+  { id: "aura_bra",     name: "オーラブラキオ",   rare: "✨レジェンド", img: "images/legend_aura_bra.png",    cat: "スペシャル" },
+  { id: "fire_tira",    name: "炎ティラノ",       rare: "🔥レジェンド", img: "images/legend_fire_tira.png",   cat: "スペシャル" }
 ];
+
 
 /* ---------- localStorage 図鑑 ---------- */
 let zukan = JSON.parse(localStorage.getItem("zukan") || "{}");
@@ -180,6 +187,7 @@ function renderCategory(title, category) {
 renderCategory("🦕 きょうりゅう", "恐竜");
 renderCategory("🌊 うみのいきもの", "海");
 renderCategory("🐛 むし", "虫");
+renderCategory("🌈 スペシャルレジェンド", "スペシャル");
 </script>
 
 </body>

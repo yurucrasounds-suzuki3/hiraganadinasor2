@@ -30,6 +30,7 @@
     background: conic-gradient(#ffeb3b,#ff9800,#f44336,#e91e63,#9c27b0,#3f51b5,#2196f3,#4caf50,#ffeb3b);
     display: flex; justify-content: center; align-items: center;
   }
+
   .circle-inner {
     background: #fffde8; width: 180px; height: 180px;
     border-radius: 50%; display: flex; justify-content: center; align-items: center;
@@ -84,23 +85,62 @@
 </div>
 
 <script>
-/* レジェンド恐竜 */
+/* ============================================
+    ★ レジェンド恐竜
+============================================ */
 const chars = [
-  {name:"金ティラノ", img:"images/legend_gold_tira.png", rare:"🌟レジェンド"},
-  {name:"虹プテラ", img:"images/legend_rainbow_pte.png", rare:"🌈レジェンド"},
-  {name:"オーラブラキオ", img:"images/legend_aura_bra.png", rare:"✨レジェンド"},
-  {name:"炎ティラノ", img:"images/legend_fire_tira.png", rare:"🔥レジェンド"}
+  {id:"gold_tira", name:"金ティラノ", img:"images/legend_gold_tira.png", rare:"🌟レジェンド"},
+  {id:"rainbow_pte", name:"虹プテラ", img:"images/legend_rainbow_pte.png", rare:"🌈レジェンド"},
+  {id:"aura_bra", name:"オーラブラキオ", img:"images/legend_aura_bra.png", rare:"✨レジェンド"},
+  {id:"fire_tira", name:"炎ティラノ", img:"images/legend_fire_tira.png", rare:"🔥レジェンド"}
 ];
 
-/* チケット取得 */
+/* ============================================
+    ★ チケット取得
+============================================ */
 let ticket = Number(localStorage.getItem("specialTicket") || 0);
 document.getElementById("ticketNum").textContent = ticket;
 
-/* ボタン */
+/* DOM参照 */
 const btn = document.getElementById("gachaBtn");
 const egg = document.getElementById("egg");
 const resultCard = document.getElementById("result");
 
+/* ============================================
+    ★ 所持一覧（owned）に追加
+============================================ */
+function addOwned(id) {
+  let owned = JSON.parse(localStorage.getItem("owned") || "[]");
+  if (!owned.includes(id)) {
+    owned.push(id);
+    localStorage.setItem("owned", JSON.stringify(owned));
+  }
+}
+
+/* ============================================
+    ★ ずかんに追加
+============================================ */
+function addToZukan(char) {
+  let zukan = JSON.parse(localStorage.getItem("zukan") || "{}");
+
+  if (!zukan[char.id]) {
+    zukan[char.id] = {
+      id: char.id,
+      name: char.name,
+      img: char.img,
+      rare: char.rare,
+      count: 1
+    };
+  } else {
+    zukan[char.id].count++;
+  }
+
+  localStorage.setItem("zukan", JSON.stringify(zukan));
+}
+
+/* ============================================
+    ★ ガチャボタン
+============================================ */
 btn.addEventListener("click", ()=>{
 
   if(ticket <= 0) return;
@@ -110,8 +150,8 @@ btn.addEventListener("click", ()=>{
   localStorage.setItem("specialTicket", ticket);
   document.getElementById("ticketNum").textContent = ticket;
 
-  /* アニメーション */
-  egg.textContent="🥚";
+  /* 演出開始 */
+  egg.textContent = "🥚";
   egg.classList.add("shake");
   resultCard.classList.remove("show");
 
@@ -119,8 +159,16 @@ btn.addEventListener("click", ()=>{
     egg.classList.remove("shake");
     egg.textContent = "✨";
 
+    /* レジェンド抽選 */
     const c = chars[Math.floor(Math.random()*chars.length)];
 
+    /* ownedに追加 */
+    addOwned(c.id);
+
+    /* ずかんに追加 */
+    addToZukan(c);
+
+    /* 結果表示 */
     document.getElementById("rare").textContent = c.rare;
     document.getElementById("rareImg").src = c.img;
     document.getElementById("rareName").textContent = c.name;
