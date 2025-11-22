@@ -30,7 +30,6 @@
     border-radius: 20px;
     text-decoration: none;
     z-index: 10;
-    touch-action: auto;
   }
 
   #progress {
@@ -72,7 +71,6 @@
     border-radius: 10px;
     border: none;
     font-size: 22px;
-    touch-action: auto !important;
   }
 
   #popup {
@@ -91,7 +89,6 @@
     transition: opacity 0.3s, transform 0.3s;
     z-index: 50;
   }
-
   #popup.show {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -119,31 +116,45 @@
 <audio id="okSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
 
 <script>
-/* ---------------------------
+/* =====================================================
     初期設定
----------------------------- */
-const selected = localStorage.getItem("selectedChar") || "あ";
+===================================================== */
+
+// 現在の文字
+let selected = localStorage.getItem("selectedChar") || "あ";
 document.getElementById("title").textContent = `${selected} をなぞろう！`;
 document.getElementById("templateImg").src = `images/stroke/${selected}.png`;
 
+// おまかせモード情報
+let omakaseMode = localStorage.getItem("omakaseMode") === "true";
+let omakaseCount = Number(localStorage.getItem("omakaseCount") || 0);
+
+// 通常モードのガチャ進行度
 function updateProgress() {
+  if (omakaseMode) {
+    document.getElementById("progress").textContent =
+      `おまかせモード ${omakaseCount} / 10`;
+    return;
+  }
+
   let count = Number(localStorage.getItem("practiceCount") || 0);
-  const rest = Math.max(0, 10 - count);
+  const rest = Math.max(0, 5 - count);
   document.getElementById("progress").textContent =
-    rest > 0 ? `ガチャまで：あと ${rest} かい` : `ガチャがひけるよ！`;
+    rest > 0 ? `ガチャまで：あと ${rest} かい`
+             : `ガチャがひけるよ！`;
 }
 updateProgress();
 
-/* ---------------------------
-    描画系
----------------------------- */
+/* =====================================================
+    描画処理
+===================================================== */
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 let drawing = false;
 let lastX = null;
 let lastY = null;
-let drawDistance = 0;  // ← 線の長さを記録
+let drawDistance = 0;
 
 canvas.addEventListener("pointerdown", e => {
   drawing = true;
@@ -164,7 +175,6 @@ canvas.addEventListener("pointermove", e => {
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  // 線の距離を加算
   const dx = x - lastX;
   const dy = y - lastY;
   drawDistance += Math.sqrt(dx*dx + dy*dy);
@@ -182,17 +192,14 @@ canvas.addEventListener("pointermove", e => {
   lastY = y;
 });
 
-/* ---------------------------
-   キャンバス消去
----------------------------- */
+/* =====================================================
+   操作系
+===================================================== */
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawDistance = 0;
 }
 
-/* ---------------------------
-   ポップ演出
----------------------------- */
 function showPopup(text) {
   const popup = document.getElementById("popup");
   popup.textContent = text;
@@ -200,73 +207,102 @@ function showPopup(text) {
   setTimeout(() => popup.classList.remove("show"), 1400);
 }
 
-/* ---------------------------
-   今日のれんしゅうを history に記録
-   （れんしゅうきろく画面が読むデータ）
----------------------------- */
+/* =====================================================
+   れんしゅう履歴
+===================================================== */
 function savePracticeHistory() {
-  // 既存の history を取得
   const history = JSON.parse(localStorage.getItem("history") || "{}");
 
-  // 今日のキー（YYYY-MM-DD）
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   const key = `${y}-${m}-${d}`;
 
-  // その日が初めてなら配列を作る
   if (!history[key]) history[key] = [];
+  history[key].push({ char: selected, time: Date.now() });
 
-  // 1かい分を追加（中身はなんでもOK。ここでは文字情報も保存）
-  history[key].push({
-    char: selected,
-    time: Date.now()
-  });
-
-  // 保存
   localStorage.setItem("history", JSON.stringify(history));
 }
 
-/* ---------------------------
-   できた！処理
----------------------------- */
+/* =====================================================
+   おまかせモードの次ステップ処理
+===================================================== */
+function goNextOmakase() {
+
+  omakaseCount++;
+  localStorage.setItem("omakaseCount", omakaseCount);
+
+  // ★ 10回達成 → バトルへ！
+  if (omakaseCount >= 10) {
+
+    // 終了処理
+    localStorage.removeItem("omakaseMode");
+    localStorage.removeItem("omakaseCount");
+
+    showPopup("10かい たっせい！バトルへGO！！🔥");
+
+    setTimeout(() => {
+      location.href = "battle.html";
+    }, 1200);
+
+    return;
+  }
+
+  // 次のランダム文字
+  const allChars =
+    "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん" +
+    "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン" +
+    "0123456789" +
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+    "abcdefghijklmnopqrstuvwxyz";
+
+  const next = allChars[Math.floor(Math.random() * allChars.length)];
+  localStorage.setItem("selectedChar", next);
+
+  showPopup(`${selected} できた！つぎは「${next}」！`);
+
+  setTimeout(() => {
+    location.href = "practice.html";
+  }, 1200);
+}
+
+/* =====================================================
+   できた！
+===================================================== */
 function finishPractice() {
+
   document.getElementById("okSound").play();
 
-  console.log("distance =", drawDistance);
-
-  // あまり書いていなかったら弾く
   if (drawDistance < 150) {
     showPopup("まずは書いてみよう！✏️");
     return;
   }
 
-  // ▼ 練習回数カウント（ガチャ用）
-  let count = Number(localStorage.getItem("practiceCount") || 0);
-  count++;
-  if (count > 10) count = 10;   // 上限10かい
-  localStorage.setItem("practiceCount", count);
-
-  // ▼ 今日のれんしゅう履歴を保存（カレンダー用）
   savePracticeHistory();
 
-  // プログレス表示更新
+  /* ▼ おまかせモード */
+  if (omakaseMode) {
+    goNextOmakase();
+    return;
+  }
+
+  /* ▼ 通常モード：5 回でガチャ */
+  let count = Number(localStorage.getItem("practiceCount") || 0);
+  count = Math.min(count + 1, 5);
+
+  localStorage.setItem("practiceCount", count);
   updateProgress();
 
-  // まだ10かい未満
-  if (count < 10) {
-    showPopup(`すごい！🦖 ガチャまで あと ${10 - count} かい！`);
+  if (count < 5) {
+    showPopup(`すごい！🦖 ガチャまで あと ${5 - count} かい！`);
     clearCanvas();
     return;
   }
 
-  // 10かい達成
-  showPopup("10かい たっせい！ガチャだ！！🎉🦖");
+  showPopup("5かい たっせい！ガチャだ！！🎉🦖");
 
-  setTimeout(() => {
-    location.href = "gacha.html";
-  }, 1200);
+  setTimeout(() => location.href = "gacha.html", 1200);
 }
 </script>
 

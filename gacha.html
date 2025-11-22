@@ -182,10 +182,10 @@ function rollGacha() {
 /* ---------- 練習回数チェック ---------- */
 let count = Number(localStorage.getItem("practiceCount") || 0);
 
-if (count < 10) {
+if (count < 5) {
   document.getElementById("gachaArea").innerHTML = `
     <h2>ガチャはまだ回せません🥲</h2>
-    <p style="font-size:22px; color:#555;">あと <b>${10 - count}</b> 回 なぞり練習が必要です</p>
+    <p style="font-size:22px; color:#555;">あと <b>${5 - count}</b> 回 なぞり練習が必要です</p>
     <a href="hiragana.html"
        style="display:inline-block;margin-top:30px;background:#4c8f3a;color:white;padding:15px 25px;border-radius:10px;text-decoration:none;">
        れんしゅうページへ
@@ -197,12 +197,12 @@ if (count < 10) {
 function startGacha() {
 
   let count = Number(localStorage.getItem("practiceCount") || 0);
-  if (count < 10) {
+  if (count < 5) {
     alert("練習が足りません！");
     return;
   }
 
-  localStorage.setItem("practiceCount", count - 10);
+  localStorage.setItem("practiceCount", count - 5);
 
   const egg = document.getElementById("egg");
   egg.classList.add("shake");

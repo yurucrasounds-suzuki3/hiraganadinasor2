@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スペシャルガチャ</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Kosugi Maru", sans-serif;
+    text-align: center;
+    background: radial-gradient(circle at top, #fff7d6 0%, #ffe4a8 40%, #f6c46b 100%);
+    color: #444;
+  }
+
+  #backBtn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #4c8f3a;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    z-index: 10;
+  }
+
+  .header {
+    padding: 30px 20px 10px;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #c66b00;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+  }
+
+  .ticket-box {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #4c8f3a;
+  }
+
+  .ticket-num {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  /* ガチャエリア */
+  .gacha-area {
+    margin-top: 20px;
+    padding: 0 20px 30px;
+  }
+
+  /* 虹の光の輪 */
+  .circle-bg {
+    width: 230px;
+    height: 230px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #ffeb3b,
+      #ff9800,
+      #f44336,
+      #e91e63,
+      #9c27b0,
+      #3f51b5,
+      #2196f3,
+      #4caf50,
+      #ffeb3b
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 18px rgba(255,255,255,0.9);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .circle-inner {
+    width: 185px;
+    height: 185px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffef8 0%, #ffecc2 45%, #f5d190 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* 卵アニメーション or カード */
+  #egg {
+    font-size: 70px;
+    transition: transform 0.2s;
+  }
+
+  .shake {
+    animation: shake 0.5s ease-in-out infinite;
+  }
+
+  @keyframes shake {
+    0% { transform: translateX(0) rotate(0deg); }
+    20% { transform: translateX(-4px) rotate(-3deg); }
+    40% { transform: translateX(4px) rotate(3deg); }
+    60% { transform: translateX(-3px) rotate(-2deg); }
+    80% { transform: translateX(3px) rotate(2deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+  }
+
+  /* 結果カード */
+  .result-card {
+    margin-top: 15px;
+    background: #fffdf5;
+    width: 90%;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 12px 15px 18px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    border: 3px solid #ffd54f;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .result-card.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .result-rare {
+    font-size: 16px;
+    color: #ff9800;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .result-name {
+    font-size: 22px;
+    color: #c66b00;
+    font-weight: bold;
+    margin: 4px 0 6px;
+  }
+
+  .result-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: #666;
+    margin-top: 6px;
+  }
+
+  /* 星きらきら */
+  .star {
+    position: absolute;
+    font-size: 22px;
+    opacity: 0;
+    animation: twinkle 1.2s ease-out infinite;
+  }
+
+  .star.s1 { top: 15%; left: 18%; animation-delay: 0s; }
+  .star.s2 { top: 12%; right: 18%; animation-delay: 0.3s; }
+  .star.s3 { bottom: 15%; left: 25%; animation-delay: 0.6s; }
+  .star.s4 { bottom: 12%; right: 20%; animation-delay: 0.9s; }
+
+  @keyframes twinkle {
+    0%   { opacity: 0; transform: scale(0.4) rotate(0deg); }
+    40%  { opacity: 1; transform: scale(1.1) rotate(18deg); }
+    100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+  }
+
+  /* ボタン */
+  .btn {
+    margin-top: 20px;
+    padding: 15px 25px;
+    font-size: 20px;
+    border-radius: 30px;
+    border: none;
+    color: white;
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
+  .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+  }
+
+  .notice {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .links {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+  .links a {
+    color: #4c8f3a;
+    text-decoration: none;
+    margin: 0 10px;
+  }
+</style>
+</head>
+
+<body>
+
+<a id="backBtn" href="index.html">← ホームへ</a>
+
+<div class="header">
+  <h1>🌈 スペシャルガチャ 🌈</h1>
+  <div class="ticket-box">
+    スペシャルガチャけん：<span class="ticket-num" id="ticketNum">0</span> まい
+  </div>
+</div>
+
+<div class="gacha-area">
+
+  <!-- 虹の丸い演出＋卵 -->
+  <div class="circle-bg">
+    <div class="circle-inner">
+      <div id="egg">🥚</div>
+    </div>
+    <!-- きらきら星 -->
+    <div class="star s1">✨</div>
+    <div class="star s2">✨</div>
+    <div class="star s3">✨</div>
+    <div class="star s4">✨</div>
+  </div>
+
+  <!-- ガチャボタン -->
+  <button class="btn" id="gachaBtn">スペシャルガチャをひく</button>
+
+  <div class="notice" id="noticeText">
+    バトルでかったら、ここでレジェンド恐竜が手に入るよ！
+  </div>
+
+  <!-- 結果表示 -->
+  <div class="result-card" id="resultCard">
+    <div class="result-rare" id="rareLabel">レジェンド</div>
+    <div class="result-name" id="charName"></div>
+    <img id="charImg" class="result-img" alt="">
+    <div class="result-desc" id="charDesc"></div>
+  </div>
+
+  <!-- 戻るリンクなど -->
+  <div class="links">
+    <a href="gacha.html">ふつうのガチャへ</a>
+    <a href="zukan.html">ずかんをみる</a>
+  </div>
+
+</div>
+
+<script>
+/* =========================================
+   レジェンド恐竜データ
+========================================= */
+const specialChars = [
+  {
+    id: "gold_tira",
+    name: "金ティラノサウルス",
+    img: "images/legend_gold_tira.png",
+    rareLabel: "🌟 レジェンド",
+    desc: "きんぴかボディの さいきょうティラノ！ きっと いいことが おこる…？",
+    weight: 25
+  },
+  {
+    id: "rainbow_pte",
+    name: "虹色プテラノドン",
+    img: "images/legend_rainbow_pte.png",
+    rareLabel: "🌈 レジェンド",
+    desc: "そらを かけめぐる にじいろの つばさ。 みんなのゆめを はこぶよ。",
+    weight: 25
+  },
+  {
+    id: "aura_bra",
+    name: "オーラブラキオサウルス",
+    img: "images/legend_aura_bra.png",
+    rareLabel: "✨ レジェンド",
+    desc: "やさしいオーラで みんなをまもる おおきなブラキオ。",
+    weight: 25
+  },
+  {
+    id: "fire_tira",
+    name: "炎ティラノサウルス",
+    img: "images/legend_fire_tira.png",
+    rareLabel: "🔥 レジェンド",
+    desc: "めらめらもえる ほのおのティラノ。 やるきまんまん！",
+    weight: 25
+  }
+];
+
+/* =========================================
+   チケット枚数の取得・表示
+========================================= */
+let ticket = Number(localStorage.getItem("specialTicket") || 0);
+const ticketNumEl = document.getElementById("ticketNum");
+const gachaBtn = document.getElementById("gachaBtn");
+const eggEl = document.getElementById("egg");
+const resultCard = document.getElementById("resultCard");
+const noticeText = document.getElementById("noticeText");
+
+function updateTicketView() {
+  ticketNumEl.textContent = ticket;
+  if (ticket <= 0) {
+    gachaBtn.disabled = true;
+    noticeText.textContent = "スペシャルガチャけんが ないよ。バトルにかって もらおう！";
+  } else {
+    gachaBtn.disabled = false;
+    noticeText.textContent = "スペシャルガチャけんを つかって レジェンド恐竜をてにいれよう！";
+  }
+}
+updateTicketView();
+
+/* =========================================
+   所持キャラ（owned）管理
+========================================= */
+function addOwned(id) {
+  let owned = JSON.parse(localStorage.getItem("owned") || "[]");
+  if (!owned.includes(id)) {
+    owned.push(id);
+    localStorage.setItem("owned", JSON.stringify(owned));
+  }
+}
+
+/* =========================================
+   抽選ロジック（重み付きランダム）
+========================================= */
+function drawSpecialChar() {
+  const total = specialChars.reduce((sum, c) => sum + c.weight, 0);
+  const r = Math.random() * total;
+  let acc = 0;
+  for (const c of specialChars) {
+    acc += c.weight;
+    if (r <= acc) return c;
+  }
+  return specialChars[0]; // 保険
+}
+
+/* =========================================
+   ガチャボタン押下
+========================================= */
+let isRolling = false;
+
+gachaBtn.addEventListener("click", () => {
+  if (isRolling) return;
+  if (ticket <= 0) return;
+
+  isRolling = true;
+
+  // チケット消費
+  ticket--;
+  localStorage.setItem("specialTicket", ticket);
+  updateTicketView();
+
+  // 演出：卵を揺らす
+  resultCard.classList.remove("show");
+  eggEl.textContent = "🥚";
+  eggEl.classList.add("shake");
+
+  // ちょっと待ってから結果を出す
+  setTimeout(() => {
+    eggEl.classList.remove("shake");
+
+    const char = drawSpecialChar();
+
+    // 所持に追加
+    addOwned(char.id);
+
+    // 卵 → キラキラに変化
+    eggEl.textContent = "✨";
+
+    // 結果カード表示
+    document.getElementById("rareLabel").textContent = char.rareLabel;
+    document.getElementById("charName").textContent = char.name;
+    document.getElementById("charImg").src = char.img;
+    document.getElementById("charImg").alt = char.name;
+    document.getElementById("charDesc").textContent = char.desc;
+
+    resultCard.classList.add("show");
+    isRolling = false;
+  }, 1400);
+});
+</script>
+
+</body>
+</html>

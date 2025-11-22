@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>50音ひょう</title>
+<title>もじをえらんでね</title>
 
 <style>
   body {
@@ -13,12 +13,39 @@
     margin: 0;
     padding: 20px;
   }
+
+  /* タブ */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 3px solid #cde8c2;
+    color: #4c8f3a;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  }
+
+  .tab.active {
+    background: #4c8f3a;
+    color: white;
+  }
+
+  /* グリッド */
   .grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 25px;
   }
+
   .char {
     background: #ffffff;
     border-radius: 20px;
@@ -26,10 +53,13 @@
     font-size: 30px;
     color: #4c8f3a;
     box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
   }
+
   .char:active {
     background: #d7f4d7;
   }
+
   #backBtn {
     position: fixed;
     top: 15px;
@@ -39,32 +69,81 @@
     padding: 10px 18px;
     border-radius: 20px;
     text-decoration: none;
+    z-index: 10;
   }
 </style>
 
 </head>
-<a id="backBtn" href="index.html">← もどる</a>
+
 <body>
 
-<h2 style="color:#4c8f3a; font-size:28px;">ひらがなをえらんでね</h2>
+<a id="backBtn" href="index.html">← もどる</a>
 
+<h2 style="color:#4c8f3a; font-size:28px;">もじをえらんでね</h2>
+
+<!-- タブ -->
+<div class="tabs">
+  <div class="tab active" data-type="hiragana">ひらがな</div>
+  <div class="tab" data-type="katakana">カタカナ</div>
+  <div class="tab" data-type="mix">すうじ / ABC</div>
+</div>
+
+<!-- グリッド -->
 <div class="grid" id="grid"></div>
 
 <script>
-const chars = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+/* -----------------------------
+   文字データ
+------------------------------*/
+const DATA = {
+  hiragana: "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん",
+  katakana: "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン",
+  mix: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+};
 
+/* -----------------------------
+   要素取得
+------------------------------*/
+const tabs = document.querySelectorAll(".tab");
 const grid = document.getElementById("grid");
 
-chars.split("").forEach(c => {
-  let div = document.createElement("div");
-  div.className = "char";
-  div.textContent = c;
-  div.onclick = () => {
-    localStorage.setItem("selectedChar", c);
-    location.href = "practice.html";
-  };
-  grid.appendChild(div);
+/* -----------------------------
+   グリッドを更新する関数
+------------------------------*/
+function render(type) {
+  grid.innerHTML = "";
+  const chars = DATA[type];
+
+  chars.split("").forEach(c => {
+    let div = document.createElement("div");
+    div.className = "char";
+    div.textContent = c;
+
+    div.onclick = () => {
+      localStorage.setItem("selectedChar", c);
+      location.href = "practice.html";
+    };
+
+    grid.appendChild(div);
+  });
+}
+
+/* -----------------------------
+   タブ切り替え
+------------------------------*/
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+
+    tabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    const type = tab.getAttribute("data-type");
+    render(type);
+  });
 });
+
+/* 初期表示：ひらがな */
+render("hiragana");
 </script>
 
 </body>
