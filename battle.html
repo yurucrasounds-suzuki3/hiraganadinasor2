@@ -16,6 +16,7 @@
     text-align: center;
     overflow: hidden;
   }
+
   #backBtn {
     position: fixed; top: 10px; left: 10px;
     background: #4c8f3a; color: white;
@@ -25,10 +26,15 @@
 
   .battle-wrapper {
     width: 100%; max-width: 650px; margin: 0 auto;
+    position: relative;
   }
+
   .battle-area {
-    display: flex; justify-content: space-between;
-    align-items: center; width: 90%; margin: 10px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    margin: 10px auto;
   }
 
   .char { width: 40%; }
@@ -53,10 +59,38 @@
 
   .char-name { font-size: 18px; margin-top: 2px; }
 
+  /* ＝＝＝＝＝ 攻撃エフェクト ＝＝＝＝＝ */
+  #hitEffect {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.2);
+    font-size: 60px;
+    color: #ff3b30;
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  #hitEffect.show {
+    animation: hitAnime 0.3s ease-out;
+  }
+
+  @keyframes hitAnime {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(-10deg); }
+    40% { opacity: 1; transform: translate(-50%, -50%) scale(1.3) rotate(5deg); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(0deg); }
+  }
+
+  /* ＝＝＝＝＝ ボタン ＝＝＝＝＝ */
   #attackBtn {
-    margin-top: 20px; padding: 20px 40px;
-    background: #ff7f50; color: #fff;
-    font-size: 28px; border: none;
+    margin-top: 20px;
+    padding: 20px 40px;
+    background: #ff7f50;
+    color: #fff;
+    font-size: 28px;
+    border: none;
     border-radius: 15px;
   }
   #attackBtn:active { transform: scale(0.95); }
@@ -89,6 +123,10 @@
 <h2>バトル！</h2>
 
 <div class="battle-wrapper">
+
+  <!-- ★ 攻撃エフェクト -->
+  <div id="hitEffect">ビシッ！！</div>
+
   <div class="battle-area">
 
     <div class="char">
@@ -109,25 +147,26 @@
 </div>
 
 <button id="attackBtn" disabled>よーい…</button>
+
 <div id="log"></div>
 <div id="popup"></div>
 
 <script>
 const WIN_TAPS = 10;
 
-/* 自分のキャラ（とりあえずティラノ） */
+/* 自分のキャラ */
 const playerChar = {
   name: "ティラノサウルス",
   img: "images/tira.png"
 };
 
-/* 敵キャラ（おに） */
+/* 敵キャラ */
 const enemyChar = {
   name: "あかおに",
   img: "images/oni.png"
 };
 
-/* 表示処理 */
+/* 表示 */
 document.getElementById("playerImg").src = playerChar.img;
 document.getElementById("playerName").textContent = playerChar.name;
 document.getElementById("enemyImg").src = enemyChar.img;
@@ -141,6 +180,14 @@ function updateHp() {
   document.getElementById("enemyHp").style.width  = enemyHP + "%";
 }
 updateHp();
+
+/* 攻撃エフェクト */
+function showHitEffect() {
+  const eff = document.getElementById("hitEffect");
+  eff.classList.remove("show");
+  void eff.offsetWidth;  // ← アニメをリセットするテクニック
+  eff.classList.add("show");
+}
 
 /* ログ */
 function log(t){
@@ -163,10 +210,11 @@ let timeLeft = 5;
 
 const attackBtn = document.getElementById("attackBtn");
 
-/* 攻撃（タップ） */
+/* ★ タップ攻撃 */
 attackBtn.addEventListener("click", ()=>{
   tapCount++;
   log("こうげき！");
+  showHitEffect();   // ← ★攻撃エフェクト発動★
 });
 
 /* カウントダウン */
@@ -209,11 +257,9 @@ function finishBattle(){
     log("あなたのかち！！🎉");
     showPopup("🎉 かったよ！！");
 
-    /* ★ 勝利 → チケット +1 ★ */
     let t = Number(localStorage.getItem("specialTicket") || 0);
     localStorage.setItem("specialTicket", t + 1);
 
-    /* ガチャへ */
     setTimeout(()=>{
       location.href = "special_gacha.html";
     }, 1200);
