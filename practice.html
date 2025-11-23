@@ -117,52 +117,38 @@
 
 <script>
 /* =====================================================
-    初期設定（通常練習ならおまかせOFF）
+   モードの判定（強化版）
 ===================================================== */
+let omakaseMode = (localStorage.getItem("omakaseMode") === "true");
+let omakaseCount = Number(localStorage.getItem("omakaseCount") || 0);
 
-// 通常練習から来た場合（hiragana.html）
-if (!localStorage.getItem("omakaseMode")) {
-  localStorage.removeItem("omakaseCount");
+/* omakaseMode が "off" または null の時 → 通常モード */
+if (localStorage.getItem("omakaseMode") === "off") {
+  omakaseMode = false;
 }
 
-// 現在の文字
+/* =====================================================
+    現在の文字
+===================================================== */
 let selected = localStorage.getItem("selectedChar") || "あ";
 document.getElementById("title").textContent = `${selected} をなぞろう！`;
 
 /* =====================================================
-    ★ ファイル名の自動判定（ここが今回のメイン）
+    書き順画像（フォルダ自動判別）
 ===================================================== */
 function getStrokeImagePath(ch) {
-  // ひらがな
   if (/[あ-ん]/.test(ch)) return `images/stroke/hira/${ch}.png`;
-
-  // カタカナ
   if (/[ア-ン]/.test(ch)) return `images/stroke/kata/${ch}.png`;
-
-  // 数字
   if (/[0-9]/.test(ch)) return `images/stroke/num/${ch}.png`;
-
-  // ローマ字（A〜Z）
   if (/[A-Z]/.test(ch)) return `images/stroke/roman_upper/${ch}.png`;
-
-  // ローマ字（a〜z）
   if (/[a-z]/.test(ch)) return `images/stroke/roman_lower/${ch}.png`;
-
-  // デフォルト
   return `images/stroke/${ch}.png`;
 }
 
-// この行を置き換え
 document.getElementById("templateImg").src = getStrokeImagePath(selected);
 
 /* =====================================================
-    おまかせモード情報
-===================================================== */
-let omakaseMode = localStorage.getItem("omakaseMode") === "true";
-let omakaseCount = Number(localStorage.getItem("omakaseCount") || 0);
-
-/* =====================================================
-    表示する進行状況
+    進捗表示
 ===================================================== */
 function updateProgress() {
   if (omakaseMode) {
@@ -173,6 +159,7 @@ function updateProgress() {
 
   let count = Number(localStorage.getItem("practiceCount") || 0);
   const rest = Math.max(0, 5 - count);
+
   document.getElementById("progress").textContent =
     rest > 0 ? `ガチャまで：あと ${rest} かい`
              : `ガチャがひけるよ！`;
@@ -211,7 +198,7 @@ canvas.addEventListener("pointermove", e => {
 
   const dx = x - lastX;
   const dy = y - lastY;
-  drawDistance += Math.sqrt(dx*dx + dy*dy);
+  drawDistance += Math.sqrt(dx * dx + dy * dy);
 
   ctx.lineWidth = 12;
   ctx.lineCap = "round";
@@ -260,7 +247,7 @@ function savePracticeHistory() {
 }
 
 /* =====================================================
-   おまかせモード：次へ
+   おまかせ → 次へ
 ===================================================== */
 function handleOmakaseNext() {
 
@@ -268,37 +255,28 @@ function handleOmakaseNext() {
   localStorage.setItem("omakaseCount", omakaseCount);
 
   if (omakaseCount >= 10) {
-    localStorage.removeItem("omakaseMode");
-    localStorage.removeItem("omakaseCount");
+    localStorage.setItem("omakaseMode", "off");
+    localStorage.setItem("omakaseCount", "0");
 
     showPopup("10かい たっせい！バトルへGO！！🔥");
-
-    setTimeout(() => {
-      location.href = "battle.html";
-    }, 1200);
-
+    setTimeout(() => location.href = "battle.html", 1200);
     return;
   }
 
   const chars =
     "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん" +
     "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン" +
-    "0123456789" +
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-    "abcdefghijklmnopqrstuvwxyz";
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   const nextChar = chars[Math.floor(Math.random() * chars.length)];
   localStorage.setItem("selectedChar", nextChar);
 
   showPopup(`${selected} できた！つぎは「${nextChar}」！`);
-
-  setTimeout(() => {
-    location.href = "practice.html";
-  }, 1200);
+  setTimeout(() => location.href = "practice.html", 1200);
 }
 
 /* =====================================================
-   できた！
+   通常練習 → できた！
 ===================================================== */
 function finishPractice() {
 
@@ -311,15 +289,17 @@ function finishPractice() {
 
   savePracticeHistory();
 
+  /* ▼ おまかせモード */
   if (omakaseMode) {
     handleOmakaseNext();
     return;
   }
 
+  /* ▼ 通常モード */
   let count = Number(localStorage.getItem("practiceCount") || 0);
   count = Math.min(count + 1, 5);
-
   localStorage.setItem("practiceCount", count);
+
   updateProgress();
 
   if (count < 5) {
@@ -327,9 +307,8 @@ function finishPractice() {
     clearCanvas();
     return;
   }
-
+  
   showPopup("5かい たっせい！ガチャだ！！🎉🦖");
-
   setTimeout(() => location.href = "gacha.html", 1200);
 }
 </script>

@@ -102,13 +102,13 @@ const DATA = {
 };
 
 /* -----------------------------
-   要素取得
+   DOM取得
 ------------------------------*/
 const tabs = document.querySelectorAll(".tab");
 const grid = document.getElementById("grid");
 
 /* -----------------------------
-   グリッドを更新する関数
+   グリッド描画
 ------------------------------*/
 function render(type) {
   grid.innerHTML = "";
@@ -120,10 +120,14 @@ function render(type) {
     div.textContent = c;
 
     div.onclick = () => {
-      /* ▼ ここが超重要！ */
-      localStorage.setItem("omakaseMode", "false");  // ★ 通常練習に戻す
-      localStorage.setItem("omakaseCount", "0");      // ★ 念のためカウントもリセット
+
+      /* 🔥 ここが超重要：通常モードへ強制切り替え */
       localStorage.setItem("selectedChar", c);
+
+      // モードを完全にリセット
+      localStorage.setItem("omakaseMode", "off");  // "false"ではなく"off"
+      localStorage.setItem("omakaseCount", "0");
+      localStorage.setItem("practiceCount", "0");
 
       location.href = "practice.html";
     };
@@ -146,7 +150,7 @@ tabs.forEach(tab => {
   });
 });
 
-/* 初期表示：ひらがな */
+/* 初期表示 */
 render("hiragana");
 </script>
 
