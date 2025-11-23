@@ -120,7 +120,11 @@ function render(type) {
     div.textContent = c;
 
     div.onclick = () => {
+      /* ▼ ここが超重要！ */
+      localStorage.setItem("omakaseMode", "false");  // ★ 通常練習に戻す
+      localStorage.setItem("omakaseCount", "0");      // ★ 念のためカウントもリセット
       localStorage.setItem("selectedChar", c);
+
       location.href = "practice.html";
     };
 
